@@ -23,10 +23,11 @@ Open [http://localhost:3000](http://localhost:3000).
 
 - **Roster** (`src/data/roster.ts`): a static, hardcoded list of the club's
   218 members (name + net ID), generated from the membership list. Login and
-  team creation only work for a net ID on this list. Note: several members'
-  emails are custom aliases, not standard two-letter-four-digit NetIDs (e.g.
-  `michael.fang`, `shaneb`) — the roster matches the exact local part of the
-  email given, not a NetID-shaped regex.
+  team creation only work for a net ID on this list. Net ID = the first 6
+  characters of the local part of each member's @princeton.edu address,
+  lowercased (e.g. `michael.fang@...` → `michae`) — two people whose emails
+  collided on that rule (`jessica.guo@...` / `jessicawei@...`, both →
+  `jessic`) were given distinct net IDs by hand instead (`jg0233` / `jw4392`).
 - **Admin**: hardcoded to net ID `vs9269` (`ADMIN_NET_ID` in `src/data/roster.ts`).
   Logging in with that net ID always goes to `/admin`, regardless of whether
   that person is on a team.
