@@ -32,8 +32,8 @@ export function SplashScreen() {
       <Image
         src="/assassins.png"
         alt="Chassassins"
-        width={640}
-        height={640}
+        width={1186}
+        height={864}
         priority
         className="h-auto w-[80vw] max-w-xl animate-pulse"
       />
