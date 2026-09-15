@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+/* ---- Charter palette (shared with chool / charter-laundry) --------------- */
+@theme {
+  --color-maroon: #680d11; /* primary brand */
+  --color-oxblood: #48080b; /* darker: hovers, footers */
+  --color-gold: #ecae36; /* accent: badges, CTAs */
+  --color-amber: #c97d18; /* deeper gold: hover/borders */
+  --color-onyx: #111111; /* dark cards / contrast */
+  --color-ink: #221c1d; /* body text */
+  --color-cream: #f9f6f0; /* page background */
+  --color-tint: #e5ddd3; /* borders / dividers */
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Sensible default link + heading treatment */
+a {
+  color: inherit;
+}
