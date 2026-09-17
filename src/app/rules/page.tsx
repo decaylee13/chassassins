@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { getAllRounds } from "@/lib/rounds";
+import { formatWindow } from "@/lib/time";
+
 export const metadata: Metadata = { title: "Rules" };
 
 export default function RulesPage() {
+  const rounds = getAllRounds();
+
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
       <div className="mb-8 text-center">
@@ -82,6 +87,18 @@ export default function RulesPage() {
             the next one begins.
           </li>
         </ul>
+        <table className="w-full border-t border-tint text-sm">
+          <tbody className="divide-y divide-tint">
+            {rounds.map((r) => (
+              <tr key={r.roundNumber}>
+                <td className="px-6 py-2 font-medium text-maroon">
+                  Round {r.roundNumber}
+                </td>
+                <td className="px-6 py-2 text-ink/70">{formatWindow(r.start, r.end)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </section>
 
       <section className="overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">

@@ -14,6 +14,21 @@ export const ROUND_LENGTH_MS = ROUND_LENGTH_DAYS * 24 * 60 * 60 * 1000;
 const SEASON_START_ET = "2026-09-18T00:00";
 export const SEASON_START: Date = easternInputValueToDate(SEASON_START_ET) as Date;
 
+export const TOTAL_ROUNDS = 5;
+
+/** Start/end instants for a given 1-indexed round number, independent of "now". */
+export function getRoundDates(roundNumber: number): { start: Date; end: Date } {
+  const startMs = SEASON_START.getTime() + (roundNumber - 1) * ROUND_LENGTH_MS;
+  return { start: new Date(startMs), end: new Date(startMs + ROUND_LENGTH_MS) };
+}
+
+export function getAllRounds(): Array<{ roundNumber: number; start: Date; end: Date }> {
+  return Array.from({ length: TOTAL_ROUNDS }, (_, i) => ({
+    roundNumber: i + 1,
+    ...getRoundDates(i + 1),
+  }));
+}
+
 export interface RoundState {
   status: "not-started" | "in-progress";
   /** 1-indexed. While not-started, this describes the upcoming Round 1. */
