@@ -45,7 +45,7 @@ export default function RulesPage() {
         <p className="px-6 py-4 text-sm text-ink/80">
           If your team eliminates{" "}
           <span className="rounded bg-gold px-1.5 py-0.5 font-medium text-oxblood">
-            5 players
+            6 players
           </span>{" "}
           collectively within a single round, you gain{" "}
           <strong>immunity for the following round</strong> — you can&apos;t
