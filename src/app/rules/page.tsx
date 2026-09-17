@@ -47,34 +47,41 @@ export default function RulesPage() {
         <div className="bg-maroon px-6 py-3 text-cream">
           <h2 className="text-lg font-semibold">Team immunity</h2>
         </div>
-        <p className="px-6 py-4 text-sm text-ink/80">
-          If your team eliminates{" "}
-          <span className="rounded bg-gold px-1.5 py-0.5 font-medium text-oxblood">
-            6 players
-          </span>{" "}
-          collectively within a single round, you gain{" "}
-          <strong>immunity for the following round</strong> — you can&apos;t
-          be eliminated while it&apos;s in effect.
-        </p>
+        <ul className="flex flex-col gap-2 px-6 py-4 text-sm text-ink/80">
+          <li>
+            Eliminate{" "}
+            <span className="rounded bg-gold px-1.5 py-0.5 font-medium text-oxblood">
+              6 players
+            </span>{" "}
+            collectively as a team, within a single round, to earn immunity.
+          </li>
+          <li>
+            Immunity applies to <strong>the following round</strong> — you
+            can&apos;t be eliminated while it&apos;s in effect.
+          </li>
+        </ul>
       </section>
 
       <section className="mb-6 overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
         <div className="bg-maroon px-6 py-3 text-cream">
           <h2 className="text-lg font-semibold">Rounds</h2>
         </div>
-        <div className="px-6 py-4 text-sm text-ink/80">
-          <p>
-            The game runs in fixed{" "}
-            <strong>3-day rounds</strong>. Round 1 starts{" "}
-            <strong>Sep 18, 12:00 AM ET</strong> — see the live countdown on
-            the{" "}
+        <ul className="flex flex-col gap-2 px-6 py-4 text-sm text-ink/80">
+          <li>
+            The game runs in fixed <strong>3-day rounds</strong>.
+          </li>
+          <li>
+            Round 1 starts <strong>Sep 18, 12:00 AM ET</strong>.
+          </li>
+          <li>
+            See the live countdown on the{" "}
             <Link href="/" className="text-maroon underline">
               home page
             </Link>{" "}
             for exactly how much time is left in the current round, or until
             the next one begins.
-          </p>
-        </div>
+          </li>
+        </ul>
       </section>
 
       <section className="overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
