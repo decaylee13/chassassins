@@ -160,3 +160,23 @@ export async function recordElimination(
     ? { ok: `${player.firstName} ${player.lastName} eliminated — ${creditedTeam.name} credited +${pointsAwarded}.` }
     : { ok: `${player.firstName} ${player.lastName} eliminated. ${creditedTeam.name} wasn't targeting that team, so no points were awarded.` };
 }
+
+/**
+ * Deletes a team outright — its players, any target-ring rows involving it,
+ * and any eliminations tied to it (as victim's team or as the credited
+ * team) all cascade via the FK constraints (see schema.ts). Meant for
+ * cleaning up mistaken/duplicate teams; there's no undo.
+ */
+export async function deleteTeam(teamId: number): Promise<AdminState> {
+  await requireAdmin();
+
+  const team = await db.query.teams.findFirst({ where: eq(teams.teamId, teamId) });
+  if (!team) return { error: "That team doesn't exist." };
+
+  await db.delete(teams).where(eq(teams.teamId, teamId));
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  return { ok: `Deleted team "${team.name}".` };
+}

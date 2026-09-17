@@ -8,13 +8,14 @@ import { formatDateTime, formatWindow } from "@/lib/time";
 import { DayForm } from "./day-form";
 import { GenerateButton, PublishButton } from "./day-actions";
 import { EliminateForm } from "./eliminate-form";
+import { DeleteTeamButton } from "./team-actions";
 
 export const metadata: Metadata = { title: "Admin" };
 
 export default async function AdminPage() {
   await requireAdmin();
 
-  const [allDays, activeTeams, remainingPlayers] = await Promise.all([
+  const [allDays, activeTeams, remainingPlayers, allTeams] = await Promise.all([
     db.query.days.findMany({
       orderBy: desc(days.dayId),
       with: { targets: { with: { team: true, targetTeam: true } } },
@@ -27,6 +28,10 @@ export default async function AdminPage() {
       where: eq(players.eliminated, false),
       with: { team: true },
       orderBy: (p, { asc }) => [asc(p.lastName)],
+    }),
+    db.query.teams.findMany({
+      with: { players: true },
+      orderBy: (t, { asc }) => [asc(t.name)],
     }),
   ]);
 
@@ -54,6 +59,37 @@ export default async function AdminPage() {
             <EliminateForm players={remainingPlayers} teams={activeTeams} />
           )}
         </div>
+      </section>
+
+      <section className="mb-6 overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
+        <div className="bg-maroon px-6 py-3 text-cream">
+          <h2 className="text-lg font-semibold">Teams</h2>
+        </div>
+        {allTeams.length === 0 ? (
+          <p className="p-6 text-sm text-ink/60">No teams yet.</p>
+        ) : (
+          <ul className="divide-y divide-tint">
+            {allTeams.map((team) => (
+              <li key={team.teamId} className="flex items-center justify-between gap-3 px-6 py-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{team.name}</span>
+                    {team.eliminated ? (
+                      <span className="rounded bg-tint px-1.5 py-0.5 text-xs text-ink/60">
+                        eliminated
+                      </span>
+                    ) : null}
+                    <span className="text-sm text-maroon">{team.points} pts</span>
+                  </div>
+                  <p className="text-xs text-ink/50">
+                    {team.players.map((p) => `${p.firstName} ${p.lastName}`).join(" & ")}
+                  </p>
+                </div>
+                <DeleteTeamButton teamId={team.teamId} teamName={team.name} />
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="flex flex-col gap-4">

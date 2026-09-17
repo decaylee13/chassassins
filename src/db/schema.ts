@@ -52,8 +52,11 @@ export const targets = pgTable("targets", {
 // just 50+50=100, per the rules).
 export const eliminations = pgTable("eliminations", {
     eliminationId: serial("elimination_id").primaryKey(),
-    playerNetId: text("player_net_id").notNull().references(() => players.netId),
-    creditedTeamId: integer("credited_team_id").notNull().references(() => teams.teamId),
+    // cascade on both: deleting a team removes its players (players.teamId
+    // cascade, below) and any elimination this team was credited for, so
+    // deleting a team can't be blocked by its own game history.
+    playerNetId: text("player_net_id").notNull().references(() => players.netId, { onDelete: "cascade" }),
+    creditedTeamId: integer("credited_team_id").notNull().references(() => teams.teamId, { onDelete: "cascade" }),
     dayId: integer("day_id").notNull().references(() => days.dayId),
     pointsAwarded: integer("points_awarded").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

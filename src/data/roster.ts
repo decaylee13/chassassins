@@ -4,10 +4,10 @@
  *
  * Generated from the club membership list. Net ID = the first 6 characters
  * of the local part of each member's @princeton.edu address, lowercased.
- * Almost everyone's is the standard two-letters-then-four-digits Princeton
- * NetID; three people's listed emails are still custom aliases rather than
- * that format (shaneb, a.kher, ianliu) — update these in this file if their
- * real NetIDs turn out to differ.
+ * Everyone's is the standard two-letters-then-four-digits Princeton NetID
+ * except Shane Brunswick, whose listed email ("shaneb@...") is still a
+ * custom alias rather than that format — update it here if his real NetID
+ * turns out to differ.
  */
 export interface RosterMember {
   netId: string;
@@ -16,7 +16,6 @@ export interface RosterMember {
 }
 
 export const ROSTER: RosterMember[] = [
-  { netId: "a.kher", firstName: "Ayushmaan (Ayush)", lastName: "Kher" },
   { netId: "aa2506", firstName: "Abigail", lastName: "Andrews" },
   { netId: "ac3718", firstName: "Aidan", lastName: "Cabahug-Almonte" },
   { netId: "ad0231", firstName: "Amber", lastName: "Deol" },
@@ -30,6 +29,7 @@ export const ROSTER: RosterMember[] = [
   { netId: "aj0032", firstName: "Annalisa", lastName: "Jenkins" },
   { netId: "aj7738", firstName: "Aaryan", lastName: "Jagtap" },
   { netId: "ak6014", firstName: "Alexander (Alex)", lastName: "Kahiga" },
+  { netId: "ak6286", firstName: "Ayushmaan (Ayush)", lastName: "Kher" },
   { netId: "al0255", firstName: "Andy", lastName: "Lau" },
   { netId: "al2807", firstName: "Akwele", lastName: "Lokko" },
   { netId: "am4674", firstName: "Anushri", lastName: "Mahabir" },
@@ -106,7 +106,7 @@ export const ROSTER: RosterMember[] = [
   { netId: "hs9620", firstName: "Hyewon", lastName: "Suh" },
   { netId: "hx0214", firstName: "Helen", lastName: "Xia" },
   { netId: "hx2004", firstName: "Harrison", lastName: "Xu" },
-  { netId: "ianliu", firstName: "Ian", lastName: "Liu" },
+  { netId: "il6375", firstName: "Ian", lastName: "Liu" },
   { netId: "iv2116", firstName: "Isabella", lastName: "Valentine" },
   { netId: "iw3285", firstName: "Isaiaz", lastName: "Whitaker" },
   { netId: "iy8488", firstName: "Iris", lastName: "Yan" },
