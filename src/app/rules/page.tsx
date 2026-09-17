@@ -84,6 +84,7 @@ export default function RulesPage() {
             <ul className="mt-1 flex flex-col gap-1 text-ink/90">
               <li>The Princeton Charter Club building — anywhere inside it.</li>
               <li>The backyard.</li>
+              <li>Your own bedroom.</li>
               <li>
                 Any scheduled competition, intramural game, or concert —{" "}
                 <strong>only while it&apos;s happening</strong>. The moment
