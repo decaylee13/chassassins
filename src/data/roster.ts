@@ -91,7 +91,7 @@ export const ROSTER: RosterMember[] = [
   { netId: "et8159", firstName: "Era", lastName: "Thaqi" },
   { netId: "eu4491", firstName: "Eren", lastName: "Umay" },
   { netId: "ez0930", firstName: "Emily", lastName: "Zhang" },
-  { netId: "ez5618", firstName: "Emily", lastName: "Zhang" },
+  { netId: "ez2798", firstName: "Emily", lastName: "Zhang" },
   { netId: "ez6108", firstName: "Erick", lastName: "Zaragoza" },
   { netId: "ez6698", firstName: "Emily", lastName: "Zou" },
   { netId: "fc0775", firstName: "Stanford", lastName: "Cramer" },
