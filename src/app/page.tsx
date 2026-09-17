@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { desc } from "drizzle-orm";
 
 import { db } from "@/db";
 import { days } from "@/db/schema";
 import { formatWindow } from "@/lib/time";
 import { SafetyCountdown } from "@/components/safety-countdown";
+import { RoundCountdown } from "@/components/round-countdown";
 
 export default async function HomePage() {
   const [latestDay, allTeams] = await Promise.all([
@@ -23,6 +25,8 @@ export default async function HomePage() {
           a time, tracked here.
         </p>
       </div>
+
+      <RoundCountdown />
 
       {latestDay ? (
         <section className="mb-6 overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
@@ -52,30 +56,18 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      <section className="mb-6 overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
-        <div className="bg-maroon px-6 py-3 text-cream">
-          <h2 className="text-lg font-semibold">Rules</h2>
+      <Link
+        href="/rules"
+        className="mb-6 flex items-center justify-between overflow-hidden rounded-2xl border border-tint bg-white px-6 py-4 shadow-sm hover:border-amber"
+      >
+        <div>
+          <h2 className="font-medium text-maroon">Rules</h2>
+          <p className="text-sm text-ink/60">
+            Scoring, team immunity, rounds, and safe zones.
+          </p>
         </div>
-        <ul className="flex flex-col gap-2 px-6 py-4 text-sm">
-          <li>
-            <span className="rounded bg-gold px-1.5 py-0.5 font-medium text-oxblood">
-              50 pts
-            </span>{" "}
-            for eliminating a single player on your target team.
-          </li>
-          <li>
-            <span className="rounded bg-gold px-1.5 py-0.5 font-medium text-oxblood">
-              100 pts
-            </span>{" "}
-            for eliminating both players on your target team.
-          </li>
-          <li className="text-ink/60">
-            Targets are reassigned each day the admin publishes a new round —
-            check your dashboard after logging in to see who you&apos;re
-            hunting.
-          </li>
-        </ul>
-      </section>
+        <span className="text-maroon">→</span>
+      </Link>
 
       <section className="overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
         <div className="bg-maroon px-6 py-3 text-cream">

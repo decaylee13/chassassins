@@ -23,6 +23,9 @@ export async function SiteHeader() {
             <Link href="/" className="hover:text-gold">
               Leaderboard
             </Link>
+            <Link href="/rules" className="hover:text-gold">
+              Rules
+            </Link>
             {isAdmin ? (
               <Link href="/admin" className="hover:text-gold">
                 Admin
