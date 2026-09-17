@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { days } from "@/db/schema";
@@ -9,7 +9,10 @@ import { RoundCountdown } from "@/components/round-countdown";
 
 export default async function HomePage() {
   const [latestDay, allTeams] = await Promise.all([
-    db.query.days.findFirst({ orderBy: desc(days.dayId) }),
+    // Only the latest *published* day is shown here — a posted-but-unpublished
+    // day stays visible to the admin (on /admin) so they can review the
+    // challenge/safety text and the generated target ring before it goes live.
+    db.query.days.findFirst({ where: eq(days.published, true), orderBy: desc(days.dayId) }),
     db.query.teams.findMany({
       with: { players: true },
       orderBy: (t, { desc: d }) => [d(t.points)],
