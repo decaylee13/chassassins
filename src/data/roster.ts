@@ -33,7 +33,7 @@ export const ROSTER: RosterMember[] = [
   { netId: "al0255", firstName: "Andy", lastName: "Lau" },
   { netId: "al2807", firstName: "Akwele", lastName: "Lokko" },
   { netId: "am4674", firstName: "Anushri", lastName: "Mahabir" },
-  { netId: "am8856", firstName: "Alexandra (Alex)", lastName: "Montgomery" },
+  { netId: "am8845", firstName: "Alexandra (Alex)", lastName: "Montgomery" },
   { netId: "ap5539", firstName: "Anna", lastName: "Praticò" },
   { netId: "ar2863", firstName: "Andrew (Reece)", lastName: "Rosen" },
   { netId: "as0714", firstName: "Abiral", lastName: "Shakya" },
