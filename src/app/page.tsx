@@ -3,6 +3,7 @@ import { desc } from "drizzle-orm";
 import { db } from "@/db";
 import { days } from "@/db/schema";
 import { formatWindow } from "@/lib/time";
+import { SafetyCountdown } from "@/components/safety-countdown";
 
 export default async function HomePage() {
   const [latestDay, allTeams] = await Promise.all([
@@ -16,7 +17,7 @@ export default async function HomePage() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-semibold text-maroon">Chassassins</h1>
+        <h1 className="text-3xl font-semibold text-maroon">Chunger Games</h1>
         <p className="mt-2 text-sm text-ink/60">
           Charter Club&apos;s assassins challenge. Teams of two, one target at
           a time, tracked here.
@@ -72,6 +73,10 @@ export default async function HomePage() {
               {formatWindow(latestDay.safetyStart, latestDay.safetyEnd)}
             </p>
           ) : null}
+          <SafetyCountdown
+            start={latestDay.safetyStart?.toISOString() ?? null}
+            end={latestDay.safetyEnd?.toISOString() ?? null}
+          />
         </section>
       ) : null}
 

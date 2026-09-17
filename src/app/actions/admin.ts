@@ -180,3 +180,25 @@ export async function deleteTeam(teamId: number): Promise<AdminState> {
   revalidatePath("/dashboard");
   return { ok: `Deleted team "${team.name}".` };
 }
+
+/**
+ * Deletes a day outright — its target ring and any eliminations logged
+ * against it cascade via the FK constraints (see schema.ts). Points already
+ * awarded to teams from those eliminations are NOT reversed (team.points is
+ * a running tally updated at record time, not recomputed from the log), so
+ * deleting a day removes the *record*, not points already banked from it.
+ * Meant for cleaning up a mistaken day post; there's no undo.
+ */
+export async function deleteDay(dayId: number): Promise<AdminState> {
+  await requireAdmin();
+
+  const day = await db.query.days.findFirst({ where: eq(days.dayId, dayId) });
+  if (!day) return { error: "That day doesn't exist." };
+
+  await db.delete(days).where(eq(days.dayId, dayId));
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  return { ok: `Deleted "${day.challengeTitle}".` };
+}

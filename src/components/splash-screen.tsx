@@ -31,7 +31,7 @@ export function SplashScreen() {
     >
       <Image
         src="/assassins.png"
-        alt="Chassassins"
+        alt="Chunger Games"
         width={1186}
         height={864}
         priority

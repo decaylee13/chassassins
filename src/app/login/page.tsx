@@ -11,7 +11,7 @@ export default function LoginPage() {
           🗡️
         </span>
         <div>
-          <h1 className="text-2xl font-semibold text-maroon">Chassassins</h1>
+          <h1 className="text-2xl font-semibold text-maroon">Chunger Games</h1>
           <p className="mt-1 text-sm text-ink/60">
             Sign in with your net ID.
           </p>

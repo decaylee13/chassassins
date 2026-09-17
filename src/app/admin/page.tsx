@@ -6,7 +6,7 @@ import { days, teams, players } from "@/db/schema";
 import { requireAdmin } from "@/lib/dal";
 import { formatDateTime, formatWindow } from "@/lib/time";
 import { DayForm } from "./day-form";
-import { GenerateButton, PublishButton } from "./day-actions";
+import { GenerateButton, PublishButton, DeleteDayButton } from "./day-actions";
 import { EliminateForm } from "./eliminate-form";
 import { DeleteTeamButton } from "./team-actions";
 
@@ -104,13 +104,16 @@ export default async function AdminPage() {
             >
               <div className="flex flex-wrap items-center justify-between gap-2 bg-maroon px-6 py-3 text-cream">
                 <h3 className="font-semibold">{day.challengeTitle}</h3>
-                <span
-                  className={`rounded px-2 py-0.5 text-xs font-medium ${
-                    day.published ? "bg-gold text-oxblood" : "bg-cream/20 text-cream"
-                  }`}
-                >
-                  {day.published ? "Published" : "Draft"}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`rounded px-2 py-0.5 text-xs font-medium ${
+                      day.published ? "bg-gold text-oxblood" : "bg-cream/20 text-cream"
+                    }`}
+                  >
+                    {day.published ? "Published" : "Draft"}
+                  </span>
+                  <DeleteDayButton dayId={day.dayId} title={day.challengeTitle} />
+                </div>
               </div>
               <div className="flex flex-col gap-3 p-6">
                 <p className="text-sm text-ink/80">{day.challengeDescription}</p>

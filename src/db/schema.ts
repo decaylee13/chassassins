@@ -57,7 +57,9 @@ export const eliminations = pgTable("eliminations", {
     // deleting a team can't be blocked by its own game history.
     playerNetId: text("player_net_id").notNull().references(() => players.netId, { onDelete: "cascade" }),
     creditedTeamId: integer("credited_team_id").notNull().references(() => teams.teamId, { onDelete: "cascade" }),
-    dayId: integer("day_id").notNull().references(() => days.dayId),
+    // Also cascade: deleting a day removes its own elimination log entries
+    // too, so a day with recorded history isn't stuck undeletable.
+    dayId: integer("day_id").notNull().references(() => days.dayId, { onDelete: "cascade" }),
     pointsAwarded: integer("points_awarded").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
