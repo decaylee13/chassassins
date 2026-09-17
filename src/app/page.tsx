@@ -24,6 +24,34 @@ export default async function HomePage() {
         </p>
       </div>
 
+      {latestDay ? (
+        <section className="mb-6 overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
+          <div className="bg-maroon px-6 py-3 text-cream">
+            <h2 className="text-lg font-semibold">
+              Today&apos;s challenge: {latestDay.challengeTitle}
+            </h2>
+          </div>
+          <p className="px-6 py-4 text-sm text-ink/80">
+            {latestDay.challengeDescription}
+          </p>
+          <div className="border-t border-amber bg-gold/20 px-6 py-4">
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-oxblood">
+              Safety
+            </h3>
+            <p className="mt-1 text-sm text-ink/90">{latestDay.safetyText}</p>
+            {latestDay.safetyStart && latestDay.safetyEnd ? (
+              <p className="mt-1 text-xs font-medium text-oxblood">
+                {formatWindow(latestDay.safetyStart, latestDay.safetyEnd)}
+              </p>
+            ) : null}
+            <SafetyCountdown
+              start={latestDay.safetyStart?.toISOString() ?? null}
+              end={latestDay.safetyEnd?.toISOString() ?? null}
+            />
+          </div>
+        </section>
+      ) : null}
+
       <section className="mb-6 overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
         <div className="bg-maroon px-6 py-3 text-cream">
           <h2 className="text-lg font-semibold">Rules</h2>
@@ -48,37 +76,6 @@ export default async function HomePage() {
           </li>
         </ul>
       </section>
-
-      {latestDay ? (
-        <section className="mb-6 overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
-          <div className="bg-maroon px-6 py-3 text-cream">
-            <h2 className="text-lg font-semibold">
-              Today&apos;s challenge: {latestDay.challengeTitle}
-            </h2>
-          </div>
-          <p className="px-6 py-4 text-sm text-ink/80">
-            {latestDay.challengeDescription}
-          </p>
-        </section>
-      ) : null}
-
-      {latestDay ? (
-        <section className="mb-8 rounded-2xl border border-amber bg-gold/20 px-6 py-4">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-oxblood">
-            Safety
-          </h2>
-          <p className="mt-1 text-sm text-ink/90">{latestDay.safetyText}</p>
-          {latestDay.safetyStart && latestDay.safetyEnd ? (
-            <p className="mt-1 text-xs font-medium text-oxblood">
-              {formatWindow(latestDay.safetyStart, latestDay.safetyEnd)}
-            </p>
-          ) : null}
-          <SafetyCountdown
-            start={latestDay.safetyStart?.toISOString() ?? null}
-            end={latestDay.safetyEnd?.toISOString() ?? null}
-          />
-        </section>
-      ) : null}
 
       <section className="overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
         <div className="bg-maroon px-6 py-3 text-cream">
