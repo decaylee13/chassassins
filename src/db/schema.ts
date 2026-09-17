@@ -21,6 +21,21 @@ export const players = pgTable("players", {
     teamId: integer("team_id").notNull().references(() => teams.teamId, { onDelete: "cascade" }),
     eliminated: boolean("eliminated").notNull().default(false),
     eliminatedAt: timestamp("eliminated_at", { withTimezone: true }),
+    // Nullable: accounts created before password auth existed (or the
+    // partner slot filled in at /join, which only sets a password for the
+    // person submitting the form) have no password yet. Login prompts
+    // whoever hits a null passwordHash to set one on the spot, rather than
+    // locking anyone out — see actions/auth.ts `login`.
+    passwordHash: text("password_hash"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Hardcoded admins (see data/roster.ts ADMIN_NET_IDS) aren't rows in
+// `players` — they're not on a team — so their password lives here instead,
+// same nullable-until-first-login-sets-it pattern.
+export const adminCredentials = pgTable("admin_credentials", {
+    netId: text("net_id").primaryKey(),
+    passwordHash: text("password_hash").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -93,4 +108,5 @@ export type Player = typeof players.$inferSelect;
 export type Day = typeof days.$inferSelect;
 export type Target = typeof targets.$inferSelect;
 export type Elimination = typeof eliminations.$inferSelect;
+export type AdminCredential = typeof adminCredentials.$inferSelect;
 export type TeamWithPlayers = Team & { players: Player[] };

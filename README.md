@@ -28,16 +28,26 @@ Open [http://localhost:3000](http://localhost:3000).
   lowercased (e.g. `michael.fang@...` → `michae`) — two people whose emails
   collided on that rule (`jessica.guo@...` / `jessicawei@...`, both →
   `jessic`) were given distinct net IDs by hand instead (`jg0233` / `jw4392`).
-- **Admin**: hardcoded to net ID `vs9269` (`ADMIN_NET_ID` in `src/data/roster.ts`).
-  Logging in with that net ID always goes to `/admin`, regardless of whether
-  that person is on a team.
+- **Admin**: hardcoded net IDs (`ADMIN_NET_IDS` in `src/data/roster.ts`).
+  Logging in with one of those always goes to `/admin`, regardless of
+  whether that person is on a team.
+- **Passwords** (`src/lib/password.ts`, Node's built-in `scrypt` — no extra
+  dependency): every account (player or admin) has one, but nobody was
+  locked out when this shipped — logging in with a net ID that has no
+  password yet prompts you to set one on the spot (`login`'s
+  create-password step in `src/app/actions/auth.ts`). `/join` also collects
+  a password for whoever submits the form; their partner sets theirs the
+  first time *they* log in.
 - **Teams**: created at `/join` by entering your net ID, your partner's net
-  ID, and a team name. If either net ID already belongs to a team, you're
-  sent to `/login` instead. A `players` row is only ever created when a team
-  forms, so "does a player row exist" doubles as "is this person on a team."
+  ID, a team name, and a password (for you — see above). If either net ID
+  already belongs to a team, you're sent to `/login` instead. A `players`
+  row is only ever created when a team forms, so "does a player row exist"
+  doubles as "is this person on a team."
 - **Days**: the admin posts a day's challenge (title + description) and
   safety notice (free text + optional Eastern-Time start/end window) any
-  time from `/admin`. That's shown on the home page immediately.
+  time from `/admin`. Stays visible only there (as a draft, alongside the
+  target-ring preview) until published — the home page only ever shows the
+  latest **published** day.
 - **Targets**: separately from posting a day, the admin generates a target
   ring — a random cycle over all still-active (non-eliminated) teams, each
   team hunting the next team in the ring — previews it, and publishes it.

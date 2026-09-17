@@ -51,6 +51,35 @@ export function JoinForm() {
         />
       </label>
 
+      <label className="flex flex-col gap-1 text-sm">
+        <span className="font-medium">Password</span>
+        <input
+          type="password"
+          name="password"
+          autoComplete="new-password"
+          required
+          minLength={8}
+          className={inputClass}
+        />
+      </label>
+
+      <label className="flex flex-col gap-1 text-sm">
+        <span className="font-medium">Confirm password</span>
+        <input
+          type="password"
+          name="confirmPassword"
+          autoComplete="new-password"
+          required
+          minLength={8}
+          className={inputClass}
+        />
+      </label>
+
+      <p className="text-xs text-ink/50">
+        This sets <strong>your</strong> password. Your partner sets theirs
+        the first time they log in.
+      </p>
+
       {error ? <p className="text-sm text-maroon">{error}</p> : null}
 
       <button
