@@ -35,6 +35,11 @@ export default function RulesPage() {
             count — check your dashboard after logging in to see who
             you&apos;re hunting.
           </li>
+          <li className="text-ink/60">
+            <strong className="text-ink/80">Proof required:</strong> a kill
+            doesn&apos;t count until you record video of it and post it in
+            the GroupMe.
+          </li>
         </ul>
       </section>
 
