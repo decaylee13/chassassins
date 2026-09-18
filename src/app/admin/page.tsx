@@ -9,6 +9,7 @@ import { DayForm } from "./day-form";
 import { GenerateButton, PublishButton, DeleteDayButton } from "./day-actions";
 import { EliminateForm } from "./eliminate-form";
 import { DeleteTeamButton } from "./team-actions";
+import { EditDaySection } from "./edit-day-form";
 
 export const metadata: Metadata = { title: "Admin" };
 
@@ -169,6 +170,8 @@ export default async function AdminPage() {
                   ) : null}
                 </div>
                 <p className="text-xs text-ink/40">Posted {formatDateTime(day.createdAt)}</p>
+
+                <EditDaySection day={day} />
 
                 {day.targets.length === 0 ? (
                   <GenerateButton dayId={day.dayId} label="Generate targets" />

@@ -48,6 +48,49 @@ export async function createDay(
   return { ok: "Day posted." };
 }
 
+/**
+ * Edits an existing day's challenge/safety text in place — works whether
+ * it's still a draft or already published (live). Doesn't touch `published`
+ * or the target ring at all, so this never un-publishes or reshuffles
+ * anything; it's purely a correction to the posted text.
+ */
+export async function updateDay(
+  dayId: number,
+  _prev: AdminState,
+  formData: FormData,
+): Promise<AdminState> {
+  await requireAdmin();
+
+  const challengeTitle = String(formData.get("challengeTitle") ?? "").trim();
+  const challengeDescription = String(formData.get("challengeDescription") ?? "").trim();
+  const safetyText = String(formData.get("safetyText") ?? "").trim();
+  const safetyStart = easternInputValueToDate(String(formData.get("safetyStart") ?? ""));
+  const safetyEnd = easternInputValueToDate(String(formData.get("safetyEnd") ?? ""));
+
+  if (!challengeTitle || !challengeDescription) {
+    return { error: "Challenge title and description are both required." };
+  }
+  if (!safetyText) {
+    return { error: "Safety notice text is required." };
+  }
+  if (safetyStart && safetyEnd && safetyEnd.getTime() <= safetyStart.getTime()) {
+    return { error: "Safety end time must be after the start time." };
+  }
+
+  const day = await db.query.days.findFirst({ where: eq(days.dayId, dayId) });
+  if (!day) return { error: "That day doesn't exist." };
+
+  await db
+    .update(days)
+    .set({ challengeTitle, challengeDescription, safetyText, safetyStart, safetyEnd })
+    .where(eq(days.dayId, dayId));
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  return { ok: "Day updated." };
+}
+
 /** Shuffle active teams into a fresh target ring for this day (overwrites any existing, unpublished ring). */
 export async function generateTargets(dayId: number): Promise<AdminState> {
   await requireAdmin();
