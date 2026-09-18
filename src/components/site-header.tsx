@@ -15,7 +15,7 @@ export async function SiteHeader() {
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-cream text-base ring-1 ring-gold/60">
             🗡️
           </span>
-          <span className="text-lg font-semibold tracking-tight">Chunger Games</span>
+          <span className="text-lg font-semibold tracking-tight">Chassassins</span>
         </Link>
 
         <div className="order-3 -mx-4 w-[calc(100%+2rem)] overflow-x-auto border-t border-oxblood/60 px-4 pt-2 sm:order-none sm:mx-0 sm:w-auto sm:border-0 sm:p-0">

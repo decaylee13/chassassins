@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Chunger Games", template: "%s · Chunger Games" },
+  title: { default: "Chassassins", template: "%s · Chassassins" },
   description: "Charter Club's assassins challenge — teams, targets, and the leaderboard.",
 };
 

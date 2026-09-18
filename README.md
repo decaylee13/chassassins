@@ -1,4 +1,4 @@
-# Chunger Games
+# Chassassins
 
 An assassins-challenge site for Charter Club, in the same design language and
 NetID login pattern as [chool](../chool) and [charter-laundry](../charter-laundry).

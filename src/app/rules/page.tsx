@@ -73,7 +73,7 @@ export default function RulesPage() {
         </div>
         <ul className="flex flex-col gap-2 px-6 py-4 text-sm text-ink/80">
           <li>
-            The game runs in fixed <strong>3-day rounds</strong>.
+            The game runs in fixed <strong>4-day rounds</strong>.
           </li>
           <li>
             Round 1 starts <strong>Sep 18, 12:00 AM ET</strong>.
@@ -85,6 +85,13 @@ export default function RulesPage() {
             </Link>{" "}
             for exactly how much time is left in the current round, or until
             the next one begins.
+          </li>
+          <li>
+            <strong className="text-maroon">
+              Your team must eliminate your target before the next round
+              starts
+            </strong>{" "}
+            — if you haven&apos;t, your team is eliminated.
           </li>
         </ul>
         <table className="w-full border-t border-tint text-sm">

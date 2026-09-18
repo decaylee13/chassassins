@@ -22,7 +22,7 @@ export default async function HomePage() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-semibold text-maroon">Chunger Games</h1>
+        <h1 className="text-3xl font-semibold text-maroon">Chassassins</h1>
         <p className="mt-2 text-sm text-ink/60">
           Charter Club&apos;s assassins challenge. Teams of two, one target at
           a time, tracked here.

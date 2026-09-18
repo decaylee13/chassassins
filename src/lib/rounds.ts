@@ -3,10 +3,10 @@ import { easternInputValueToDate } from "./time";
 /**
  * The game is divided into fixed, calendar-driven rounds — independent of
  * the admin-posted "days" (challenge/safety/targets, see src/db/schema.ts
- * `days`). A round is purely a 3-day window computed from a fixed season
+ * `days`). A round is purely a 4-day window computed from a fixed season
  * start; nothing about it depends on admin action.
  */
-export const ROUND_LENGTH_DAYS = 3;
+export const ROUND_LENGTH_DAYS = 4;
 export const ROUND_LENGTH_MS = ROUND_LENGTH_DAYS * 24 * 60 * 60 * 1000;
 
 // Round 1 starts Sep 18, 2026, 12:00 AM Eastern Time. Known-valid literal,
