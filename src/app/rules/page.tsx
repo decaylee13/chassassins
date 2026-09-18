@@ -138,7 +138,7 @@ export default function RulesPage() {
               Not safe
             </h3>
             <ul className="mt-1 flex flex-col gap-1 text-ink/80">
-              <li>Sidewalks — including right outside Charter.</li>
+              <li>The gray sidewalk — including right outside Charter.</li>
               <li>Hallways, and classrooms/labs outside of class time.</li>
             </ul>
           </div>
