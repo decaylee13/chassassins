@@ -166,6 +166,8 @@ export async function recordElimination(
   const onTarget = target !== undefined && target.targetTeamId === player.teamId;
   const pointsAwarded = onTarget ? POINTS_PER_KILL : 0;
 
+  let chainNote = "";
+
   await db.transaction(async (tx) => {
     await tx.insert(eliminations).values({
       playerNetId,
@@ -191,7 +193,47 @@ export async function recordElimination(
       where: and(eq(players.teamId, player.teamId), eq(players.eliminated, false)),
     });
     if (remaining.length === 0) {
-      await tx.update(teams).set({ eliminated: true }).where(eq(teams.teamId, player.teamId));
+      const wipedTeamId = player.teamId;
+      await tx.update(teams).set({ eliminated: true }).where(eq(teams.teamId, wipedTeamId));
+
+      // Classic Assassins chain rule: whoever was *actually* hunting the
+      // now-wiped team (per the ring, not necessarily whoever got
+      // elimination credit above) immediately inherits that team's own
+      // target, skipping the wiped team. buildTargetRing guarantees no
+      // team ever targets itself, so hunterTarget.teamId !== wipedTeamId.
+      const [hunterTarget, wipedTeamTarget] = await Promise.all([
+        tx.query.targets.findFirst({
+          where: and(eq(targets.dayId, currentDay.dayId), eq(targets.targetTeamId, wipedTeamId)),
+          with: { team: true },
+        }),
+        tx.query.targets.findFirst({
+          where: and(eq(targets.dayId, currentDay.dayId), eq(targets.teamId, wipedTeamId)),
+          with: { targetTeam: true },
+        }),
+      ]);
+
+      if (hunterTarget && wipedTeamTarget) {
+        if (wipedTeamTarget.targetTeamId === hunterTarget.teamId) {
+          // The wiped team's target was the hunter itself — nobody left to
+          // hunt. Last team standing; clear their target rather than have
+          // them point at themselves.
+          await tx
+            .delete(targets)
+            .where(and(eq(targets.dayId, currentDay.dayId), eq(targets.teamId, hunterTarget.teamId)));
+          chainNote = ` ${hunterTarget.team.name} has eliminated their target chain — no target remains (last team standing).`;
+        } else {
+          await tx
+            .update(targets)
+            .set({ targetTeamId: wipedTeamTarget.targetTeamId })
+            .where(and(eq(targets.dayId, currentDay.dayId), eq(targets.teamId, hunterTarget.teamId)));
+          chainNote = ` ${hunterTarget.team.name} inherits ${wipedTeamTarget.targetTeam.name} as their new target.`;
+        }
+      }
+
+      // The wiped team is out of the game — drop their own target row too.
+      await tx
+        .delete(targets)
+        .where(and(eq(targets.dayId, currentDay.dayId), eq(targets.teamId, wipedTeamId)));
     }
   });
 
@@ -200,8 +242,8 @@ export async function recordElimination(
   revalidatePath("/dashboard");
 
   return onTarget
-    ? { ok: `${player.firstName} ${player.lastName} eliminated — ${creditedTeam.name} credited +${pointsAwarded}.` }
-    : { ok: `${player.firstName} ${player.lastName} eliminated. ${creditedTeam.name} wasn't targeting that team, so no points were awarded.` };
+    ? { ok: `${player.firstName} ${player.lastName} eliminated — ${creditedTeam.name} credited +${pointsAwarded}.${chainNote}` }
+    : { ok: `${player.firstName} ${player.lastName} eliminated. ${creditedTeam.name} wasn't targeting that team, so no points were awarded.${chainNote}` };
 }
 
 /**
