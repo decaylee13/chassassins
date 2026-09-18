@@ -121,6 +121,7 @@ export default function RulesPage() {
               <li>The Princeton Charter Club building — anywhere inside it.</li>
               <li>The backyard.</li>
               <li>Your own bedroom.</li>
+              <li>Past the bushes entering Charter.</li>
               <li>
                 Classrooms and labs — <strong>only during class time</strong>.
                 The moment class ends, you&apos;re fair game again (hallways,
