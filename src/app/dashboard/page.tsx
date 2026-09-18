@@ -4,6 +4,7 @@ import { desc, eq, and } from "drizzle-orm";
 import { db } from "@/db";
 import { days, targets, players } from "@/db/schema";
 import { requirePlayer } from "@/lib/dal";
+import { hasAdvanced } from "@/lib/advancement";
 
 export const metadata: Metadata = { title: "My team" };
 
@@ -36,6 +37,10 @@ export default async function DashboardPage() {
             {player.team.eliminated ? (
               <span className="ml-2 rounded bg-cream/20 px-1.5 py-0.5 align-middle text-xs font-medium">
                 eliminated
+              </span>
+            ) : hasAdvanced(player.team.points) ? (
+              <span className="ml-2 rounded bg-gold px-1.5 py-0.5 align-middle text-xs font-medium text-oxblood">
+                🏆 Advanced to Round 2
               </span>
             ) : null}
           </h1>

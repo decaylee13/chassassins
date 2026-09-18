@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { days, teams, players, targets } from "@/db/schema";
 import { requireAdmin } from "@/lib/dal";
 import { formatDateTime, formatWindow } from "@/lib/time";
+import { hasAdvanced } from "@/lib/advancement";
 import { DayForm } from "./day-form";
 import { GenerateButton, PublishButton, DeleteDayButton } from "./day-actions";
 import { EliminateForm } from "./eliminate-form";
@@ -160,6 +161,10 @@ export default async function AdminPage() {
                     {team.eliminated ? (
                       <span className="rounded bg-tint px-1.5 py-0.5 text-xs text-ink/60">
                         eliminated
+                      </span>
+                    ) : hasAdvanced(team.points) ? (
+                      <span className="rounded bg-gold px-1.5 py-0.5 text-xs font-medium text-oxblood">
+                        🏆 Advanced
                       </span>
                     ) : null}
                     <span className="text-sm text-maroon">{team.points} pts</span>

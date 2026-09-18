@@ -6,6 +6,7 @@ import { days } from "@/db/schema";
 import { formatWindow } from "@/lib/time";
 import { SafetyCountdown } from "@/components/safety-countdown";
 import { RoundCountdown } from "@/components/round-countdown";
+import { hasAdvanced } from "@/lib/advancement";
 
 export default async function HomePage() {
   const [latestDay, allTeams] = await Promise.all([
@@ -95,6 +96,10 @@ export default async function HomePage() {
                       {team.eliminated ? (
                         <span className="rounded bg-tint px-1.5 py-0.5 text-xs text-ink/60">
                           eliminated
+                        </span>
+                      ) : hasAdvanced(team.points) ? (
+                        <span className="rounded bg-gold px-1.5 py-0.5 text-xs font-medium text-oxblood">
+                          🏆 Advanced to Round 2
                         </span>
                       ) : null}
                     </div>
