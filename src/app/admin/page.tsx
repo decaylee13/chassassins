@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, and } from "drizzle-orm";
 
 import { db } from "@/db";
-import { days, teams, players } from "@/db/schema";
+import { days, teams, players, targets } from "@/db/schema";
 import { requireAdmin } from "@/lib/dal";
 import { formatDateTime, formatWindow } from "@/lib/time";
 import { DayForm } from "./day-form";
@@ -13,9 +13,9 @@ import { DeleteTeamButton } from "./team-actions";
 export const metadata: Metadata = { title: "Admin" };
 
 export default async function AdminPage() {
-  await requireAdmin();
+  const adminNetId = await requireAdmin();
 
-  const [allDays, activeTeams, remainingPlayers, allTeams] = await Promise.all([
+  const [allDays, activeTeams, remainingPlayers, allTeams, adminPlayer] = await Promise.all([
     db.query.days.findMany({
       orderBy: desc(days.dayId),
       with: { targets: { with: { team: true, targetTeam: true } } },
@@ -33,11 +33,53 @@ export default async function AdminPage() {
       with: { players: true },
       orderBy: (t, { asc }) => [asc(t.name)],
     }),
+    // An admin can also be a player on a team (e.g. dl2635) — if so, show
+    // their own target below, same as a regular player sees on /dashboard.
+    db.query.players.findFirst({ where: eq(players.netId, adminNetId), with: { team: true } }),
   ]);
+
+  const currentDay = allDays.find((d) => d.published);
+  const myTarget =
+    adminPlayer && currentDay
+      ? await db.query.targets.findFirst({
+          where: and(eq(targets.dayId, currentDay.dayId), eq(targets.teamId, adminPlayer.teamId)),
+          with: { targetTeam: { with: { players: true } } },
+        })
+      : null;
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
       <h1 className="mb-6 text-2xl font-semibold text-maroon">Admin</h1>
+
+      {adminPlayer ? (
+        <section className="mb-6 overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
+          <div className="bg-maroon px-6 py-3 text-cream">
+            <h2 className="text-lg font-semibold">
+              Your target — playing as {adminPlayer.team.name}
+            </h2>
+          </div>
+          <div className="p-6">
+            {!currentDay ? (
+              <p className="text-sm text-ink/60">No targets have been published yet.</p>
+            ) : !myTarget ? (
+              <p className="text-sm text-ink/60">
+                You don&apos;t have a target for the current round.
+              </p>
+            ) : (
+              <div>
+                <p className="text-xl font-semibold text-maroon">{myTarget.targetTeam.name}</p>
+                <ul className="mt-2 flex flex-col gap-1 text-sm">
+                  {myTarget.targetTeam.players.map((t) => (
+                    <li key={t.netId} className={t.eliminated ? "text-ink/40 line-through" : ""}>
+                      {t.firstName} {t.lastName}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </section>
+      ) : null}
 
       <section className="mb-6 overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
         <div className="bg-maroon px-6 py-3 text-cream">

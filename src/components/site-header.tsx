@@ -6,7 +6,9 @@ import { logout } from "@/app/actions/auth";
 export async function SiteHeader() {
   const netId = await getSessionNetId();
   const isAdmin = await isCurrentUserAdmin();
-  const player = isAdmin ? null : await getCurrentPlayer();
+  // Fetched regardless of admin status — an admin can also be on a team
+  // (see /admin's "Your target" section), and should still see "My team".
+  const player = await getCurrentPlayer();
 
   return (
     <header className="border-b border-oxblood bg-maroon text-cream">
@@ -30,7 +32,8 @@ export async function SiteHeader() {
               <Link href="/admin" className="hover:text-gold">
                 Admin
               </Link>
-            ) : player ? (
+            ) : null}
+            {player ? (
               <Link href="/dashboard" className="hover:text-gold">
                 My team
               </Link>
@@ -42,7 +45,7 @@ export async function SiteHeader() {
           {netId ? (
             <>
               <span className="hidden max-w-[10rem] truncate text-cream/85 sm:inline-block">
-                {isAdmin ? "Admin" : player ? displayName(player) : netId}
+                {player ? displayName(player) : isAdmin ? "Admin" : netId}
               </span>
               <form action={logout}>
                 <button className="rounded border border-cream/25 px-2 py-1 text-xs text-cream/85 hover:border-gold hover:text-gold">
