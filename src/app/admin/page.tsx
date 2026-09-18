@@ -10,13 +10,14 @@ import { GenerateButton, PublishButton, DeleteDayButton } from "./day-actions";
 import { EliminateForm } from "./eliminate-form";
 import { DeleteTeamButton } from "./team-actions";
 import { EditDaySection } from "./edit-day-form";
+import { UndoEliminationButton } from "./undo-elimination-button";
 
 export const metadata: Metadata = { title: "Admin" };
 
 export default async function AdminPage() {
   const adminNetId = await requireAdmin();
 
-  const [allDays, activeTeams, remainingPlayers, allTeams, adminPlayer] = await Promise.all([
+  const [allDays, activeTeams, remainingPlayers, allTeams, adminPlayer, recentEliminations] = await Promise.all([
     db.query.days.findMany({
       orderBy: desc(days.dayId),
       with: { targets: { with: { team: true, targetTeam: true } } },
@@ -37,6 +38,11 @@ export default async function AdminPage() {
     // An admin can also be a player on a team (e.g. dl2635) — if so, show
     // their own target below, same as a regular player sees on /dashboard.
     db.query.players.findFirst({ where: eq(players.netId, adminNetId), with: { team: true } }),
+    db.query.eliminations.findMany({
+      orderBy: (e, { desc: d }) => [d(e.createdAt)],
+      limit: 30,
+      with: { player: true, creditedTeam: true },
+    }),
   ]);
 
   const currentDay = allDays.find((d) => d.published);
@@ -102,6 +108,40 @@ export default async function AdminPage() {
             <EliminateForm players={remainingPlayers} teams={activeTeams} />
           )}
         </div>
+      </section>
+
+      <section className="mb-6 overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
+        <div className="bg-maroon px-6 py-3 text-cream">
+          <h2 className="text-lg font-semibold">Eliminations</h2>
+        </div>
+        {recentEliminations.length === 0 ? (
+          <p className="p-6 text-sm text-ink/60">No eliminations recorded yet.</p>
+        ) : (
+          <ul className="divide-y divide-tint">
+            {recentEliminations.map((e) => (
+              <li key={e.eliminationId} className="flex items-center justify-between gap-3 px-6 py-3">
+                <div>
+                  <p className="text-sm">
+                    <span className="font-medium">
+                      {e.player.firstName} {e.player.lastName}
+                    </span>{" "}
+                    — credited to {e.creditedTeam.name}
+                    {e.pointsAwarded > 0 ? (
+                      <span className="ml-1 text-maroon">+{e.pointsAwarded}</span>
+                    ) : (
+                      <span className="ml-1 text-ink/40">+0</span>
+                    )}
+                  </p>
+                  <p className="text-xs text-ink/40">{formatDateTime(e.createdAt)}</p>
+                </div>
+                <UndoEliminationButton
+                  eliminationId={e.eliminationId}
+                  label={`${e.player.firstName} ${e.player.lastName}`}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="mb-6 overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">

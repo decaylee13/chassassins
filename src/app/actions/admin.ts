@@ -169,12 +169,13 @@ export async function recordElimination(
   let chainNote = "";
 
   await db.transaction(async (tx) => {
-    await tx.insert(eliminations).values({
-      playerNetId,
-      creditedTeamId,
-      dayId: currentDay.dayId,
-      pointsAwarded,
-    });
+    // Snapshot of any chain reassignment this elimination triggers, so
+    // undoElimination can reverse it exactly. Stays all-null if this
+    // elimination doesn't complete a wipe.
+    let wipedTeamId: number | null = null;
+    let hunterTeamId: number | null = null;
+    let wipedTeamOldTargetTeamId: number | null = null;
+    let hunterRowDeleted = false;
 
     await tx
       .update(players)
@@ -193,7 +194,7 @@ export async function recordElimination(
       where: and(eq(players.teamId, player.teamId), eq(players.eliminated, false)),
     });
     if (remaining.length === 0) {
-      const wipedTeamId = player.teamId;
+      wipedTeamId = player.teamId;
       await tx.update(teams).set({ eliminated: true }).where(eq(teams.teamId, wipedTeamId));
 
       // Classic Assassins chain rule: whoever was *actually* hunting the
@@ -213,6 +214,9 @@ export async function recordElimination(
       ]);
 
       if (hunterTarget && wipedTeamTarget) {
+        hunterTeamId = hunterTarget.teamId;
+        wipedTeamOldTargetTeamId = wipedTeamTarget.targetTeamId;
+
         if (wipedTeamTarget.targetTeamId === hunterTarget.teamId) {
           // The wiped team's target was the hunter itself — nobody left to
           // hunt. Last team standing; clear their target rather than have
@@ -220,6 +224,7 @@ export async function recordElimination(
           await tx
             .delete(targets)
             .where(and(eq(targets.dayId, currentDay.dayId), eq(targets.teamId, hunterTarget.teamId)));
+          hunterRowDeleted = true;
           chainNote = ` ${hunterTarget.team.name} has eliminated their target chain — no target remains (last team standing).`;
         } else {
           await tx
@@ -235,6 +240,17 @@ export async function recordElimination(
         .delete(targets)
         .where(and(eq(targets.dayId, currentDay.dayId), eq(targets.teamId, wipedTeamId)));
     }
+
+    await tx.insert(eliminations).values({
+      playerNetId,
+      creditedTeamId,
+      dayId: currentDay.dayId,
+      pointsAwarded,
+      wipedTeamId,
+      hunterTeamId,
+      wipedTeamOldTargetTeamId,
+      hunterRowDeleted,
+    });
   });
 
   revalidatePath("/");
@@ -244,6 +260,105 @@ export async function recordElimination(
   return onTarget
     ? { ok: `${player.firstName} ${player.lastName} eliminated — ${creditedTeam.name} credited +${pointsAwarded}.${chainNote}` }
     : { ok: `${player.firstName} ${player.lastName} eliminated. ${creditedTeam.name} wasn't targeting that team, so no points were awarded.${chainNote}` };
+}
+
+/**
+ * Reverses a recorded elimination: un-eliminates the player, subtracts any
+ * points it awarded, and un-eliminates their team (recomputed live — if
+ * this player is no longer eliminated, their team can't be "fully wiped"
+ * anymore, regardless of what's stored). If this elimination completed a
+ * chain-inheritance reassignment (see recordElimination), reverses that
+ * too using the snapshot stored on the elimination row — restores the
+ * wiped team's own target row and the hunter's target back to the wiped
+ * team (or re-deletes-and-restores it, if it had been cleared for the
+ * last-team-standing case).
+ *
+ * Rows recorded before this snapshot existed have no chain data to
+ * reverse — player/points/team-eliminated still get fixed correctly, but
+ * the target ring itself isn't touched for those, and the message says so.
+ */
+export async function undoElimination(eliminationId: number): Promise<AdminState> {
+  await requireAdmin();
+
+  const elimination = await db.query.eliminations.findFirst({
+    where: eq(eliminations.eliminationId, eliminationId),
+  });
+  if (!elimination) return { error: "That elimination doesn't exist." };
+
+  const player = await db.query.players.findFirst({ where: eq(players.netId, elimination.playerNetId) });
+  if (!player) return { error: "That player no longer exists." };
+
+  let ringWarning = "";
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(players)
+      .set({ eliminated: false, eliminatedAt: null })
+      .where(eq(players.netId, elimination.playerNetId));
+
+    // Reviving this player means their team can't be fully wiped anymore —
+    // true regardless of whether we have chain-snapshot data for it.
+    await tx.update(teams).set({ eliminated: false }).where(eq(teams.teamId, player.teamId));
+
+    if (elimination.pointsAwarded > 0) {
+      await tx
+        .update(teams)
+        .set({ points: sql`${teams.points} - ${elimination.pointsAwarded}` })
+        .where(eq(teams.teamId, elimination.creditedTeamId));
+    }
+
+    if (elimination.wipedTeamId !== null) {
+      const wipedTeamId = elimination.wipedTeamId;
+
+      if (elimination.wipedTeamOldTargetTeamId !== null) {
+        const existing = await tx.query.targets.findFirst({
+          where: and(eq(targets.dayId, elimination.dayId), eq(targets.teamId, wipedTeamId)),
+        });
+        if (!existing) {
+          await tx.insert(targets).values({
+            dayId: elimination.dayId,
+            teamId: wipedTeamId,
+            targetTeamId: elimination.wipedTeamOldTargetTeamId,
+          });
+        } else {
+          ringWarning = " Target ring has since changed further — restore it by hand if needed.";
+        }
+      }
+
+      if (elimination.hunterTeamId !== null) {
+        const hunterTeamId = elimination.hunterTeamId;
+        if (elimination.hunterRowDeleted) {
+          const existing = await tx.query.targets.findFirst({
+            where: and(eq(targets.dayId, elimination.dayId), eq(targets.teamId, hunterTeamId)),
+          });
+          if (!existing) {
+            await tx.insert(targets).values({
+              dayId: elimination.dayId,
+              teamId: hunterTeamId,
+              targetTeamId: wipedTeamId,
+            });
+          } else {
+            ringWarning = " Target ring has since changed further — restore it by hand if needed.";
+          }
+        } else {
+          await tx
+            .update(targets)
+            .set({ targetTeamId: wipedTeamId })
+            .where(and(eq(targets.dayId, elimination.dayId), eq(targets.teamId, hunterTeamId)));
+        }
+      }
+    }
+    // else: no snapshot (this elimination didn't complete a wipe, or it's
+    // a legacy row from before this column existed) — nothing to reverse
+    // on the target ring either way.
+
+    await tx.delete(eliminations).where(eq(eliminations.eliminationId, eliminationId));
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  return { ok: `Undid elimination of ${player.firstName} ${player.lastName}.${ringWarning}` };
 }
 
 /**

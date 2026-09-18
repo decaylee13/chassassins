@@ -76,6 +76,17 @@ export const eliminations = pgTable("eliminations", {
     // too, so a day with recorded history isn't stuck undeletable.
     dayId: integer("day_id").notNull().references(() => days.dayId, { onDelete: "cascade" }),
     pointsAwarded: integer("points_awarded").notNull().default(0),
+    // Populated only when this elimination completed a full team wipe (see
+    // recordElimination) — the "before" state of any chain-inheritance
+    // reassignment, so undoElimination can reverse it exactly. Null on
+    // eliminations that didn't complete a wipe, and on rows recorded before
+    // this column existed (undo still reverts points/player/team-eliminated
+    // for those — recomputed live, not from this snapshot — it just can't
+    // restore the target ring for them).
+    wipedTeamId: integer("wiped_team_id"),
+    hunterTeamId: integer("hunter_team_id"),
+    wipedTeamOldTargetTeamId: integer("wiped_team_old_target_team_id"),
+    hunterRowDeleted: boolean("hunter_row_deleted").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
