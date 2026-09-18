@@ -122,6 +122,11 @@ export default function RulesPage() {
               <li>The backyard.</li>
               <li>Your own bedroom.</li>
               <li>
+                Classrooms and labs — <strong>only during class time</strong>.
+                The moment class ends, you&apos;re fair game again (hallways,
+                etc.).
+              </li>
+              <li>
                 Any scheduled competition, intramural game, or concert —{" "}
                 <strong>only while it&apos;s happening</strong>. The moment
                 it ends, you&apos;re fair game again.
@@ -134,7 +139,7 @@ export default function RulesPage() {
             </h3>
             <ul className="mt-1 flex flex-col gap-1 text-ink/80">
               <li>Sidewalks — including right outside Charter.</li>
-              <li>Classrooms — fair game everywhere, no exceptions.</li>
+              <li>Hallways, and classrooms/labs outside of class time.</li>
             </ul>
           </div>
         </div>
