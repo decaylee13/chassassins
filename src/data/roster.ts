@@ -219,7 +219,7 @@ export const ROSTER: RosterMember[] = [
   { netId: "vg6472", firstName: "Vivian", lastName: "Gilman" },
   { netId: "vh0968", firstName: "Vivian", lastName: "Huang" },
   { netId: "vo3261", firstName: "Victoria", lastName: "Outkin" },
-  { netId: "vp9408", firstName: "Vatsal", lastName: "Parikh" },
+  { netId: "vp9508", firstName: "Vatsal", lastName: "Parikh" },
   { netId: "vs9269", firstName: "Vasco", lastName: "Rato Santos" },
   { netId: "vs9542", firstName: "Venkat", lastName: "Subramanian" },
   { netId: "wr1383", firstName: "William (Will)", lastName: "Rhoades" },
