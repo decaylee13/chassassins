@@ -132,6 +132,10 @@ export default function RulesPage() {
                 <strong>only while it&apos;s happening</strong>. The moment
                 it ends, you&apos;re fair game again.
               </li>
+              <li>
+                Work — <strong>only while you&apos;re clocked in</strong>. The
+                moment your shift ends, you&apos;re fair game again.
+              </li>
             </ul>
           </div>
           <div className="rounded-lg border border-tint bg-cream px-4 py-3">
