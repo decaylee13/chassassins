@@ -15,7 +15,9 @@ export default async function HomePage() {
     db.query.days.findFirst({ where: eq(days.published, true), orderBy: desc(days.dayId) }),
     db.query.teams.findMany({
       with: { players: true },
-      orderBy: (t, { desc: d }) => [d(t.points)],
+      // Surviving teams first (sorted by points), eliminated teams grouped
+      // at the bottom (also sorted by points within that group).
+      orderBy: (t, { asc, desc: d }) => [asc(t.eliminated), d(t.points)],
     }),
   ]);
 
