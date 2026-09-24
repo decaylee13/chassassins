@@ -12,11 +12,13 @@ import { DeleteTeamButton } from "./team-actions";
 import { EditDaySection } from "./edit-day-form";
 import { DraftSafetySection } from "./draft-safety-section";
 import { UndoEliminationButton } from "./undo-elimination-button";
+import { autoApplyDueDraftSafety } from "@/lib/auto-apply-draft-safety";
 
 export const metadata: Metadata = { title: "Admin" };
 
 export default async function AdminPage() {
   const adminNetId = await requireAdmin();
+  await autoApplyDueDraftSafety();
 
   const [allDays, activeTeams, remainingPlayers, allTeams, adminPlayer, recentEliminations] = await Promise.all([
     db.query.days.findMany({

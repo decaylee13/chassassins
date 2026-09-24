@@ -6,8 +6,14 @@ import { days } from "@/db/schema";
 import { formatWindow } from "@/lib/time";
 import { SafetyCountdown } from "@/components/safety-countdown";
 import { RoundCountdown } from "@/components/round-countdown";
+import { autoApplyDueDraftSafety } from "@/lib/auto-apply-draft-safety";
 
 export default async function HomePage() {
+  // Applies any staged draft safety whose scheduled start time has passed,
+  // before reading `days` below — see auto-apply-draft-safety.ts for why
+  // this is request-triggered rather than a real cron job.
+  await autoApplyDueDraftSafety();
+
   const [latestDay, allTeams] = await Promise.all([
     // Only the latest *published* day is shown here — a posted-but-unpublished
     // day stays visible to the admin (on /admin) so they can review the
