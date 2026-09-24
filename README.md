@@ -60,8 +60,10 @@ Open [http://localhost:3000](http://localhost:3000).
   Only once published do teams see their target on `/dashboard`. Only the
   latest **published** day's ring counts as "current."
 - **Eliminations**: the admin records them directly (`/admin` → "Record an
-  elimination"): pick the eliminated player and which team gets credit. If
-  that player was actually on the credited team's current target, the team
-  gets +50 points; two eliminations on the same target team is +100 total.
-  If both members of a team are eliminated, that team is marked eliminated
-  and drops out of future target rings.
+  elimination") by picking only the eliminated player — credit goes
+  automatically to whoever is currently targeting that player's team in
+  the ring, no manual team selection. +50 points per kill; two eliminations
+  on the same target team is +100 total. If nobody currently targets that
+  player's team, recording is refused (nothing to credit). If both members
+  of a team are eliminated, that team is marked eliminated and drops out of
+  future target rings.

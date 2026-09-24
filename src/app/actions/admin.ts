@@ -219,15 +219,13 @@ export async function recordElimination(
   await requireAdmin();
 
   const playerNetId = String(formData.get("playerNetId") ?? "").trim().toLowerCase();
-  const creditedTeamId = Number(formData.get("creditedTeamId"));
 
-  const player = await db.query.players.findFirst({ where: eq(players.netId, playerNetId) });
+  const player = await db.query.players.findFirst({
+    where: eq(players.netId, playerNetId),
+    with: { team: true },
+  });
   if (!player) return { error: "Unknown player net ID." };
   if (player.eliminated) return { error: `${player.firstName} ${player.lastName} is already eliminated.` };
-  if (!creditedTeamId) return { error: "Pick which team gets credit." };
-
-  const creditedTeam = await db.query.teams.findFirst({ where: eq(teams.teamId, creditedTeamId) });
-  if (!creditedTeam) return { error: "Unknown credited team." };
 
   const currentDay = await db.query.days.findFirst({
     where: eq(days.published, true),
@@ -235,11 +233,22 @@ export async function recordElimination(
   });
   if (!currentDay) return { error: "No published day to record eliminations against." };
 
-  const target = await db.query.targets.findFirst({
-    where: and(eq(targets.dayId, currentDay.dayId), eq(targets.teamId, creditedTeamId)),
+  // Credit is no longer picked by hand — it's whoever is *actually* hunting
+  // this player's team right now, per the current ring. Always on-target by
+  // construction, so this always awards points (no more "wasn't targeting
+  // them" case — if nobody's hunting them, there's nobody to credit at all).
+  const hunterRow = await db.query.targets.findFirst({
+    where: and(eq(targets.dayId, currentDay.dayId), eq(targets.targetTeamId, player.teamId)),
+    with: { team: true },
   });
-  const onTarget = target !== undefined && target.targetTeamId === player.teamId;
-  const pointsAwarded = onTarget ? POINTS_PER_KILL : 0;
+  if (!hunterRow) {
+    return {
+      error: `${player.team.name} isn't currently anyone's target — can't determine who to credit for eliminating ${player.firstName} ${player.lastName}.`,
+    };
+  }
+  const creditedTeamId = hunterRow.teamId;
+  const creditedTeam = hunterRow.team;
+  const pointsAwarded = POINTS_PER_KILL;
 
   let chainNote = "";
 
@@ -332,9 +341,7 @@ export async function recordElimination(
   revalidatePath("/admin");
   revalidatePath("/dashboard");
 
-  return onTarget
-    ? { ok: `${player.firstName} ${player.lastName} eliminated — ${creditedTeam.name} credited +${pointsAwarded}.${chainNote}` }
-    : { ok: `${player.firstName} ${player.lastName} eliminated. ${creditedTeam.name} wasn't targeting that team, so no points were awarded.${chainNote}` };
+  return { ok: `${player.firstName} ${player.lastName} eliminated — ${creditedTeam.name} credited +${pointsAwarded}.${chainNote}` };
 }
 
 /**

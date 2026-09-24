@@ -106,7 +106,7 @@ export default async function AdminPage() {
           {remainingPlayers.length === 0 || activeTeams.length === 0 ? (
             <p className="text-sm text-ink/60">No active players/teams yet.</p>
           ) : (
-            <EliminateForm players={remainingPlayers} teams={activeTeams} />
+            <EliminateForm players={remainingPlayers} />
           )}
         </div>
       </section>

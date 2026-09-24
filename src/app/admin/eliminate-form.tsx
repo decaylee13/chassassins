@@ -7,13 +7,7 @@ import type { Player, Team } from "@/db/schema";
 const inputClass =
   "rounded-lg border border-tint bg-cream px-3 py-2 text-base outline-none focus:border-amber focus:ring-2 focus:ring-gold/40";
 
-export function EliminateForm({
-  players,
-  teams,
-}: {
-  players: (Player & { team: Team })[];
-  teams: Team[];
-}) {
+export function EliminateForm({ players }: { players: (Player & { team: Team })[] }) {
   const [state, formAction, pending] = useActionState<AdminState, FormData>(
     recordElimination,
     undefined,
@@ -41,20 +35,10 @@ export function EliminateForm({
           ))}
         </select>
       </label>
-
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Credit to team</span>
-        <select name="creditedTeamId" required defaultValue="" className={inputClass}>
-          <option value="" disabled>
-            Choose a team
-          </option>
-          {teams.map((t) => (
-            <option key={t.teamId} value={t.teamId}>
-              {t.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <p className="text-xs text-ink/50">
+        Credit goes automatically to whoever is currently targeting this
+        player&apos;s team — no need to pick a team.
+      </p>
 
       {error ? <p className="text-sm text-maroon">{error}</p> : null}
       {ok ? <p className="text-sm text-amber">{ok}</p> : null}
