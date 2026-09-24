@@ -10,6 +10,7 @@ import { GenerateButton, PublishButton, DeleteDayButton } from "./day-actions";
 import { EliminateForm } from "./eliminate-form";
 import { DeleteTeamButton } from "./team-actions";
 import { EditDaySection } from "./edit-day-form";
+import { DraftSafetySection } from "./draft-safety-section";
 import { UndoEliminationButton } from "./undo-elimination-button";
 
 export const metadata: Metadata = { title: "Admin" };
@@ -213,7 +214,10 @@ export default async function AdminPage() {
                 </div>
                 <p className="text-xs text-ink/40">Posted {formatDateTime(day.createdAt)}</p>
 
-                <EditDaySection day={day} />
+                <div className="flex flex-wrap gap-3">
+                  <EditDaySection day={day} />
+                  <DraftSafetySection day={day} />
+                </div>
 
                 {day.targets.length === 0 ? (
                   <GenerateButton dayId={day.dayId} label="Generate targets" />

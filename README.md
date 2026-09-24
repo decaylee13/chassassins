@@ -48,6 +48,12 @@ Open [http://localhost:3000](http://localhost:3000).
   time from `/admin`. Stays visible only there (as a draft, alongside the
   target-ring preview) until published — the home page only ever shows the
   latest **published** day.
+- **Draft safety**: on any day (typically the currently live one), the
+  admin can stage a safety update — text + optional window — completely
+  invisible to everyone until "Apply now" is clicked, which swaps it over
+  the live safety fields instantly. No new day, no targets touched. Meant
+  for writing tomorrow's safety notice in advance instead of scrambling at
+  the deadline.
 - **Targets**: separately from posting a day, the admin generates a target
   ring — a random cycle over all still-active (non-eliminated) teams, each
   team hunting the next team in the ring — previews it, and publishes it.

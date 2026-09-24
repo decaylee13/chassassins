@@ -91,6 +91,81 @@ export async function updateDay(
   return { ok: "Day updated." };
 }
 
+/**
+ * Stages a safety update on this day without touching the live safety text
+ * shown on the home page — completely invisible until applyDraftSafety is
+ * called. Lets the admin write tomorrow's safety notice in advance while
+ * today's is still live, without creating a new day or touching targets.
+ */
+export async function saveDraftSafety(
+  dayId: number,
+  _prev: AdminState,
+  formData: FormData,
+): Promise<AdminState> {
+  await requireAdmin();
+
+  const draftSafetyText = String(formData.get("draftSafetyText") ?? "").trim();
+  const draftSafetyStart = easternInputValueToDate(String(formData.get("draftSafetyStart") ?? ""));
+  const draftSafetyEnd = easternInputValueToDate(String(formData.get("draftSafetyEnd") ?? ""));
+
+  if (!draftSafetyText) {
+    return { error: "Draft safety text is required." };
+  }
+  if (draftSafetyStart && draftSafetyEnd && draftSafetyEnd.getTime() <= draftSafetyStart.getTime()) {
+    return { error: "Draft safety end time must be after the start time." };
+  }
+
+  const day = await db.query.days.findFirst({ where: eq(days.dayId, dayId) });
+  if (!day) return { error: "That day doesn't exist." };
+
+  await db
+    .update(days)
+    .set({ draftSafetyText, draftSafetyStart, draftSafetyEnd })
+    .where(eq(days.dayId, dayId));
+
+  revalidatePath("/admin");
+  return { ok: "Draft safety saved — not visible to anyone until you apply it." };
+}
+
+/** Copies the staged draft safety fields over the live ones and clears the draft. Instant, no targets touched. */
+export async function applyDraftSafety(dayId: number): Promise<AdminState> {
+  await requireAdmin();
+
+  const day = await db.query.days.findFirst({ where: eq(days.dayId, dayId) });
+  if (!day) return { error: "That day doesn't exist." };
+  if (!day.draftSafetyText) return { error: "No draft safety to apply." };
+
+  await db
+    .update(days)
+    .set({
+      safetyText: day.draftSafetyText,
+      safetyStart: day.draftSafetyStart,
+      safetyEnd: day.draftSafetyEnd,
+      draftSafetyText: null,
+      draftSafetyStart: null,
+      draftSafetyEnd: null,
+    })
+    .where(eq(days.dayId, dayId));
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  return { ok: "Draft safety applied — now live." };
+}
+
+/** Discards a staged draft safety without applying it. */
+export async function discardDraftSafety(dayId: number): Promise<AdminState> {
+  await requireAdmin();
+
+  await db
+    .update(days)
+    .set({ draftSafetyText: null, draftSafetyStart: null, draftSafetyEnd: null })
+    .where(eq(days.dayId, dayId));
+
+  revalidatePath("/admin");
+  return { ok: "Draft discarded." };
+}
+
 /** Shuffle active teams into a fresh target ring for this day (overwrites any existing, unpublished ring). */
 export async function generateTargets(dayId: number): Promise<AdminState> {
   await requireAdmin();

@@ -49,6 +49,14 @@ export const days = pgTable("days", {
     safetyText: text("safety_text").notNull(),
     safetyStart: timestamp("safety_start", { withTimezone: true }),
     safetyEnd: timestamp("safety_end", { withTimezone: true }),
+    // A staged safety update — written in advance, completely invisible to
+    // everyone (only the fields above are ever shown publicly) until the
+    // admin clicks "Apply now", which copies these over the live fields and
+    // clears the draft. Lets the admin prep tomorrow's safety notice while
+    // today's is still live, without creating a new day or touching targets.
+    draftSafetyText: text("draft_safety_text"),
+    draftSafetyStart: timestamp("draft_safety_start", { withTimezone: true }),
+    draftSafetyEnd: timestamp("draft_safety_end", { withTimezone: true }),
     published: boolean("published").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
