@@ -4,6 +4,7 @@ import { desc, eq, and } from "drizzle-orm";
 import { db } from "@/db";
 import { days, targets, players } from "@/db/schema";
 import { requirePlayer } from "@/lib/dal";
+import { getKillCountForTeam } from "@/lib/kills";
 
 export const metadata: Metadata = { title: "My team" };
 
@@ -26,6 +27,8 @@ export default async function DashboardPage() {
       })
     : null;
 
+  const killCount = await getKillCountForTeam(player.teamId);
+
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
       <section className="overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
@@ -43,8 +46,8 @@ export default async function DashboardPage() {
 
         <div className="grid grid-cols-2 divide-x divide-tint text-center">
           <div className="px-4 py-5">
-            <div className="text-3xl font-semibold text-maroon">{player.team.points}</div>
-            <div className="mt-1 text-xs uppercase tracking-wide text-ink/50">Points</div>
+            <div className="text-3xl font-semibold text-maroon">{killCount}</div>
+            <div className="mt-1 text-xs uppercase tracking-wide text-ink/50">Teams eliminated</div>
           </div>
           <div className="px-4 py-5">
             <ul className="flex flex-col gap-1 text-sm">

@@ -7,6 +7,7 @@ import { formatWindow } from "@/lib/time";
 import { SafetyCountdown } from "@/components/safety-countdown";
 import { RoundCountdown } from "@/components/round-countdown";
 import { autoApplyDueDraftSafety } from "@/lib/auto-apply-draft-safety";
+import { getKillCounts } from "@/lib/kills";
 
 export default async function HomePage() {
   // Applies any staged draft safety whose scheduled start time has passed,
@@ -14,18 +15,21 @@ export default async function HomePage() {
   // this is request-triggered rather than a real cron job.
   await autoApplyDueDraftSafety();
 
-  const [latestDay, allTeams] = await Promise.all([
+  const [latestDay, teamsResult, killCounts] = await Promise.all([
     // Only the latest *published* day is shown here — a posted-but-unpublished
     // day stays visible to the admin (on /admin) so they can review the
     // challenge/safety text and the generated target ring before it goes live.
     db.query.days.findFirst({ where: eq(days.published, true), orderBy: desc(days.dayId) }),
-    db.query.teams.findMany({
-      with: { players: true },
-      // Surviving teams first (sorted by points), eliminated teams grouped
-      // at the bottom (also sorted by points within that group).
-      orderBy: (t, { asc, desc: d }) => [asc(t.eliminated), d(t.points)],
-    }),
+    db.query.teams.findMany({ with: { players: true } }),
+    getKillCounts(),
   ]);
+
+  // Surviving teams first (sorted by kill count), eliminated teams grouped
+  // at the bottom (also sorted by kill count within that group).
+  const allTeams = [...teamsResult].sort((a, b) => {
+    if (a.eliminated !== b.eliminated) return a.eliminated ? 1 : -1;
+    return (killCounts.get(b.teamId) ?? 0) - (killCounts.get(a.teamId) ?? 0);
+  });
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
@@ -81,8 +85,9 @@ export default async function HomePage() {
       </Link>
 
       <section className="overflow-hidden rounded-2xl border border-tint bg-white shadow-sm">
-        <div className="bg-maroon px-6 py-3 text-cream">
+        <div className="flex items-center justify-between bg-maroon px-6 py-3 text-cream">
           <h2 className="text-lg font-semibold">Leaderboard</h2>
+          <span className="text-xs uppercase tracking-wide text-cream/70">Teams eliminated</span>
         </div>
         {allTeams.length === 0 ? (
           <p className="p-6 text-sm text-ink/60">No teams yet.</p>
@@ -119,8 +124,9 @@ export default async function HomePage() {
                       ? "text-lg font-semibold text-ink/40 line-through"
                       : "text-lg font-semibold text-maroon"
                   }
+                  title="Teams eliminated"
                 >
-                  {team.points}
+                  {killCounts.get(team.teamId) ?? 0}
                 </span>
               </li>
             ))}

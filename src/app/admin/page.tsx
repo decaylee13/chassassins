@@ -13,6 +13,7 @@ import { EditDaySection } from "./edit-day-form";
 import { DraftSafetySection } from "./draft-safety-section";
 import { UndoEliminationButton } from "./undo-elimination-button";
 import { autoApplyDueDraftSafety } from "@/lib/auto-apply-draft-safety";
+import { getKillCounts } from "@/lib/kills";
 
 export const metadata: Metadata = { title: "Admin" };
 
@@ -20,7 +21,7 @@ export default async function AdminPage() {
   const adminNetId = await requireAdmin();
   await autoApplyDueDraftSafety();
 
-  const [allDays, activeTeams, remainingPlayers, allTeams, adminPlayer, recentEliminations] = await Promise.all([
+  const [allDays, activeTeams, remainingPlayers, allTeams, adminPlayer, recentEliminations, killCounts] = await Promise.all([
     db.query.days.findMany({
       orderBy: desc(days.dayId),
       with: { targets: { with: { team: true, targetTeam: true } } },
@@ -46,6 +47,7 @@ export default async function AdminPage() {
       limit: 30,
       with: { player: true, creditedTeam: true },
     }),
+    getKillCounts(),
   ]);
 
   const currentDay = allDays.find((d) => d.published);
@@ -167,7 +169,9 @@ export default async function AdminPage() {
                         eliminated
                       </span>
                     ) : null}
-                    <span className="text-sm text-maroon">{team.points} pts</span>
+                    <span className="text-sm text-maroon">
+                      {killCounts.get(team.teamId) ?? 0} {(killCounts.get(team.teamId) ?? 0) === 1 ? "kill" : "kills"}
+                    </span>
                   </div>
                   <p className="text-xs text-ink/50">
                     {team.players.map((p) => `${p.firstName} ${p.lastName}`).join(" & ")}
