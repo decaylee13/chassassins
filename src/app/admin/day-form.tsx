@@ -53,6 +53,16 @@ export function DayForm() {
         </label>
       </div>
 
+      <label className="flex flex-col gap-1 text-sm">
+        <span className="font-medium">Safety image (optional)</span>
+        <input
+          type="file"
+          name="safetyImage"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          className={inputClass}
+        />
+      </label>
+
       {error ? <p className="text-sm text-maroon">{error}</p> : null}
       {ok ? <p className="text-sm text-amber">{ok}</p> : null}
 

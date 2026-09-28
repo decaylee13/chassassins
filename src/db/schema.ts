@@ -49,6 +49,11 @@ export const days = pgTable("days", {
     safetyText: text("safety_text").notNull(),
     safetyStart: timestamp("safety_start", { withTimezone: true }),
     safetyEnd: timestamp("safety_end", { withTimezone: true }),
+    // Optional image attached to the safety notice — stored as a data URI
+    // (see lib/image-upload.ts) rather than external blob storage, so no
+    // new infrastructure/credentials are needed. Fine at this scale; would
+    // need revisiting if images got large/frequent enough to matter.
+    safetyImageUrl: text("safety_image_url"),
     // A staged safety update — written in advance, completely invisible to
     // everyone (only the fields above are ever shown publicly) until the
     // admin clicks "Apply now", which copies these over the live fields and
@@ -57,6 +62,7 @@ export const days = pgTable("days", {
     draftSafetyText: text("draft_safety_text"),
     draftSafetyStart: timestamp("draft_safety_start", { withTimezone: true }),
     draftSafetyEnd: timestamp("draft_safety_end", { withTimezone: true }),
+    draftSafetyImageUrl: text("draft_safety_image_url"),
     published: boolean("published").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

@@ -44,16 +44,20 @@ Open [http://localhost:3000](http://localhost:3000).
   row is only ever created when a team forms, so "does a player row exist"
   doubles as "is this person on a team."
 - **Days**: the admin posts a day's challenge (title + description) and
-  safety notice (free text + optional Eastern-Time start/end window) any
-  time from `/admin`. Stays visible only there (as a draft, alongside the
-  target-ring preview) until published — the home page only ever shows the
-  latest **published** day.
+  safety notice (free text + optional Eastern-Time start/end window +
+  optional image) any time from `/admin`. Stays visible only there (as a
+  draft, alongside the target-ring preview) until published — the home
+  page only ever shows the latest **published** day. Safety images are
+  stored as base64 data URIs directly on the day row (`src/lib/image-
+  upload.ts`, 3MB cap, PNG/JPEG/WEBP/GIF) — no external blob storage.
 - **Draft safety**: on any day (typically the currently live one), the
-  admin can stage a safety update — text + optional window — completely
-  invisible to everyone until "Apply now" is clicked, which swaps it over
-  the live safety fields instantly. No new day, no targets touched. Meant
-  for writing tomorrow's safety notice in advance instead of scrambling at
-  the deadline.
+  admin can stage a safety update — text + optional window + optional
+  image — completely invisible to everyone until "Apply now" is clicked,
+  which swaps it over the live safety fields instantly. No new day, no
+  targets touched. A draft with a start time in the past auto-applies the
+  next time the home page or `/admin` loads (`src/lib/auto-apply-draft-
+  safety.ts`) — meant for writing tomorrow's safety notice in advance
+  instead of scrambling at the deadline.
 - **Targets**: separately from posting a day, the admin generates a target
   ring — a random cycle over all still-active (non-eliminated) teams, each
   team hunting the next team in the ring — previews it, and publishes it.

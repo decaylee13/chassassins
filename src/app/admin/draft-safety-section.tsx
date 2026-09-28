@@ -51,6 +51,10 @@ export function DraftSafetySection({ day }: { day: Day }) {
             {formatWindow(day.draftSafetyStart, day.draftSafetyEnd)}
           </p>
         ) : null}
+        {day.draftSafetyImageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- data URI, not a static/remote asset Next/Image can optimize
+          <img src={day.draftSafetyImageUrl} alt="Draft safety" className="h-20 w-20 rounded-lg object-cover" />
+        ) : null}
         {actionMessage ? <p className="text-xs text-ink/60">{actionMessage}</p> : null}
         <div className="flex gap-3">
           <button
@@ -124,6 +128,28 @@ export function DraftSafetySection({ day }: { day: Day }) {
           />
         </label>
       </div>
+
+      {day.draftSafetyImageUrl ? (
+        <div className="flex items-start gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element -- data URI, not a static/remote asset Next/Image can optimize */}
+          <img src={day.draftSafetyImageUrl} alt="Current draft" className="h-20 w-20 rounded-lg object-cover" />
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="removeDraftSafetyImage" className="h-4 w-4" />
+            Remove this image
+          </label>
+        </div>
+      ) : null}
+      <label className="flex flex-col gap-1 text-sm">
+        <span className="font-medium">
+          {day.draftSafetyImageUrl ? "Replace draft image" : "Draft image (optional)"}
+        </span>
+        <input
+          type="file"
+          name="draftSafetyImage"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          className={inputClass}
+        />
+      </label>
 
       {error ? <p className="text-sm text-maroon">{error}</p> : null}
       {ok ? <p className="text-sm text-amber">{ok}</p> : null}

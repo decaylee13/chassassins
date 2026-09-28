@@ -58,6 +58,14 @@ export default async function HomePage() {
               Safety
             </h3>
             <p className="mt-1 text-sm text-ink/90">{latestDay.safetyText}</p>
+            {latestDay.safetyImageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- data URI, not a static/remote asset Next/Image can optimize
+              <img
+                src={latestDay.safetyImageUrl}
+                alt="Safety notice"
+                className="mt-2 max-h-80 w-full rounded-lg object-contain"
+              />
+            ) : null}
             {latestDay.safetyStart && latestDay.safetyEnd ? (
               <p className="mt-1 text-xs font-medium text-oxblood">
                 {formatWindow(latestDay.safetyStart, latestDay.safetyEnd)}

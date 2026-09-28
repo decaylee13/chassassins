@@ -8,6 +8,7 @@ import { days, targets, teams, players, eliminations } from "@/db/schema";
 import { requireAdmin } from "@/lib/dal";
 import { buildTargetRing } from "@/lib/ring";
 import { easternInputValueToDate } from "@/lib/time";
+import { fileFieldToDataUri } from "@/lib/image-upload";
 
 export type AdminState = { error: string } | { ok: string } | undefined;
 
@@ -35,12 +36,16 @@ export async function createDay(
     return { error: "Safety end time must be after the start time." };
   }
 
+  const image = await fileFieldToDataUri(formData, "safetyImage");
+  if ("error" in image) return { error: image.error };
+
   await db.insert(days).values({
     challengeTitle,
     challengeDescription,
     safetyText,
     safetyStart,
     safetyEnd,
+    safetyImageUrl: image.dataUri,
   });
 
   revalidatePath("/");
@@ -80,9 +85,16 @@ export async function updateDay(
   const day = await db.query.days.findFirst({ where: eq(days.dayId, dayId) });
   if (!day) return { error: "That day doesn't exist." };
 
+  const image = await fileFieldToDataUri(formData, "safetyImage");
+  if ("error" in image) return { error: image.error };
+  const removeImage = formData.get("removeSafetyImage") === "on";
+  // Precedence: uploading a new image replaces it; otherwise the checkbox
+  // can clear it; otherwise the existing image (if any) is left alone.
+  const safetyImageUrl = image.dataUri ?? (removeImage ? null : day.safetyImageUrl);
+
   await db
     .update(days)
-    .set({ challengeTitle, challengeDescription, safetyText, safetyStart, safetyEnd })
+    .set({ challengeTitle, challengeDescription, safetyText, safetyStart, safetyEnd, safetyImageUrl })
     .where(eq(days.dayId, dayId));
 
   revalidatePath("/");
@@ -118,9 +130,14 @@ export async function saveDraftSafety(
   const day = await db.query.days.findFirst({ where: eq(days.dayId, dayId) });
   if (!day) return { error: "That day doesn't exist." };
 
+  const image = await fileFieldToDataUri(formData, "draftSafetyImage");
+  if ("error" in image) return { error: image.error };
+  const removeImage = formData.get("removeDraftSafetyImage") === "on";
+  const draftSafetyImageUrl = image.dataUri ?? (removeImage ? null : day.draftSafetyImageUrl);
+
   await db
     .update(days)
-    .set({ draftSafetyText, draftSafetyStart, draftSafetyEnd })
+    .set({ draftSafetyText, draftSafetyStart, draftSafetyEnd, draftSafetyImageUrl })
     .where(eq(days.dayId, dayId));
 
   revalidatePath("/admin");
@@ -141,9 +158,11 @@ export async function applyDraftSafety(dayId: number): Promise<AdminState> {
       safetyText: day.draftSafetyText,
       safetyStart: day.draftSafetyStart,
       safetyEnd: day.draftSafetyEnd,
+      safetyImageUrl: day.draftSafetyImageUrl,
       draftSafetyText: null,
       draftSafetyStart: null,
       draftSafetyEnd: null,
+      draftSafetyImageUrl: null,
     })
     .where(eq(days.dayId, dayId));
 
@@ -159,7 +178,7 @@ export async function discardDraftSafety(dayId: number): Promise<AdminState> {
 
   await db
     .update(days)
-    .set({ draftSafetyText: null, draftSafetyStart: null, draftSafetyEnd: null })
+    .set({ draftSafetyText: null, draftSafetyStart: null, draftSafetyEnd: null, draftSafetyImageUrl: null })
     .where(eq(days.dayId, dayId));
 
   revalidatePath("/admin");

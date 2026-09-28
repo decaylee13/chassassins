@@ -91,6 +91,28 @@ export function EditDaySection({ day }: { day: Day }) {
         </label>
       </div>
 
+      {day.safetyImageUrl ? (
+        <div className="flex items-start gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element -- data URI, not a static/remote asset Next/Image can optimize */}
+          <img src={day.safetyImageUrl} alt="Current safety" className="h-20 w-20 rounded-lg object-cover" />
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="removeSafetyImage" className="h-4 w-4" />
+            Remove this image
+          </label>
+        </div>
+      ) : null}
+      <label className="flex flex-col gap-1 text-sm">
+        <span className="font-medium">
+          {day.safetyImageUrl ? "Replace safety image" : "Safety image (optional)"}
+        </span>
+        <input
+          type="file"
+          name="safetyImage"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          className={inputClass}
+        />
+      </label>
+
       {error ? <p className="text-sm text-maroon">{error}</p> : null}
       {ok ? <p className="text-sm text-amber">{ok}</p> : null}
 

@@ -35,9 +35,11 @@ export async function autoApplyDueDraftSafety(): Promise<void> {
         safetyText: day.draftSafetyText as string,
         safetyStart: day.draftSafetyStart,
         safetyEnd: day.draftSafetyEnd,
+        safetyImageUrl: day.draftSafetyImageUrl,
         draftSafetyText: null,
         draftSafetyStart: null,
         draftSafetyEnd: null,
+        draftSafetyImageUrl: null,
       })
       .where(eq(days.dayId, day.dayId));
   }
