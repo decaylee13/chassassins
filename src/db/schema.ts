@@ -80,9 +80,14 @@ export const eliminations = pgTable("eliminations", {
     // deleting a team can't be blocked by its own game history.
     playerNetId: text("player_net_id").notNull().references(() => players.netId, { onDelete: "cascade" }),
     creditedTeamId: integer("credited_team_id").notNull().references(() => teams.teamId, { onDelete: "cascade" }),
-    // Also cascade: deleting a day removes its own elimination log entries
-    // too, so a day with recorded history isn't stuck undeletable.
-    dayId: integer("day_id").notNull().references(() => days.dayId, { onDelete: "cascade" }),
+    // Nullable + set-null (not cascade): deleting a day must not destroy
+    // the points/kill-credit history of eliminations recorded against it.
+    // A day can still be deleted freely; its eliminations just detach
+    // (dayId -> null) instead of disappearing. (Previously this cascaded,
+    // which silently wiped kill-tally history for every team eliminated
+    // under a day that later got deleted — the actual cause of a real
+    // data-loss incident.)
+    dayId: integer("day_id").references(() => days.dayId, { onDelete: "set null" }),
     pointsAwarded: integer("points_awarded").notNull().default(0),
     // Populated only when this elimination completed a full team wipe (see
     // recordElimination) — the "before" state of any chain-inheritance

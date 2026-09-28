@@ -389,16 +389,22 @@ export async function undoElimination(eliminationId: number): Promise<AdminState
         .where(eq(teams.teamId, elimination.creditedTeamId));
     }
 
-    if (elimination.wipedTeamId !== null) {
+    if (elimination.wipedTeamId !== null && elimination.dayId === null) {
+      // The day this elimination was recorded against has since been
+      // deleted (detaching dayId rather than destroying this row — see
+      // schema.ts) — there's no target ring left to restore into.
+      ringWarning = " The day this was recorded against has since been deleted, so the target ring couldn't be restored.";
+    } else if (elimination.wipedTeamId !== null && elimination.dayId !== null) {
       const wipedTeamId = elimination.wipedTeamId;
+      const dayId = elimination.dayId;
 
       if (elimination.wipedTeamOldTargetTeamId !== null) {
         const existing = await tx.query.targets.findFirst({
-          where: and(eq(targets.dayId, elimination.dayId), eq(targets.teamId, wipedTeamId)),
+          where: and(eq(targets.dayId, dayId), eq(targets.teamId, wipedTeamId)),
         });
         if (!existing) {
           await tx.insert(targets).values({
-            dayId: elimination.dayId,
+            dayId,
             teamId: wipedTeamId,
             targetTeamId: elimination.wipedTeamOldTargetTeamId,
           });
@@ -411,11 +417,11 @@ export async function undoElimination(eliminationId: number): Promise<AdminState
         const hunterTeamId = elimination.hunterTeamId;
         if (elimination.hunterRowDeleted) {
           const existing = await tx.query.targets.findFirst({
-            where: and(eq(targets.dayId, elimination.dayId), eq(targets.teamId, hunterTeamId)),
+            where: and(eq(targets.dayId, dayId), eq(targets.teamId, hunterTeamId)),
           });
           if (!existing) {
             await tx.insert(targets).values({
-              dayId: elimination.dayId,
+              dayId,
               teamId: hunterTeamId,
               targetTeamId: wipedTeamId,
             });
@@ -426,7 +432,7 @@ export async function undoElimination(eliminationId: number): Promise<AdminState
           await tx
             .update(targets)
             .set({ targetTeamId: wipedTeamId })
-            .where(and(eq(targets.dayId, elimination.dayId), eq(targets.teamId, hunterTeamId)));
+            .where(and(eq(targets.dayId, dayId), eq(targets.teamId, hunterTeamId)));
         }
       }
     }
@@ -464,12 +470,13 @@ export async function deleteTeam(teamId: number): Promise<AdminState> {
 }
 
 /**
- * Deletes a day outright — its target ring and any eliminations logged
- * against it cascade via the FK constraints (see schema.ts). Points already
- * awarded to teams from those eliminations are NOT reversed (team.points is
- * a running tally updated at record time, not recomputed from the log), so
- * deleting a day removes the *record*, not points already banked from it.
- * Meant for cleaning up a mistaken day post; there's no undo.
+ * Deletes a day outright — its target ring cascades (gone with it), but its
+ * eliminations do NOT: they detach (dayId -> null) instead of disappearing,
+ * so points and kill-tally credit survive even after the day itself is
+ * gone (see schema.ts — this was a cascade before, and silently destroyed
+ * that history the first time a day with recorded eliminations was
+ * deleted). Meant for cleaning up a mistaken day post; there's no undo for
+ * the day record itself.
  */
 export async function deleteDay(dayId: number): Promise<AdminState> {
   await requireAdmin();
